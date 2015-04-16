@@ -10,7 +10,7 @@ isHaltingState = (statenum) -> statenum < 0
 
 class TuringProgram
   symbols: null  # The number of symbols in the program
-  states:  {}    # The states of the program
+  states:  {}    # The states of the program organised by statenum (0: <state 0>, etc.)
 
   constructor: (@symbols) ->
 
@@ -28,7 +28,7 @@ class TuringProgram
 
 class TuringState
   statenum: null # The number of the state
-  decisions: {}  # The list of states organised by statenum (0: <state 0>, etc.)
+  decisions: {}  # The decisions organised by symbol (0: <decision for symbol 0>, etc.)
 
   constructor: (@statenum) ->
 
@@ -42,10 +42,13 @@ class TuringState
     @decisions[symbol]
 
 class TuringDecision
-  write: null    # The write symbol
-  move:  null    # The move number
-  goto:  null    # The state to go to after moving
+  symbol: null
+  write:  null    # The write symbol
+  move:   null    # The move number
+  goto:   null    # The state to go to after moving
 
-  constructor: (@write, @move, @goto) ->
+  constructor: (@write = -1, @move = 0, @goto = -1) ->
 
   set: (@write, @move, @goto) ->
+
+module.exports = {isHaltingState, TuringProgram, TuringState, TuringDecision}

@@ -5,7 +5,7 @@
   This program is published under the MIT licence
 ###
 
-{isHaltingState} = require "./turing-program"
+{isHaltingState} = require "./turing-program.coffee"
 
 MOVE = {
   GRADUAL: 0
@@ -31,12 +31,12 @@ class TuringMachine
 
   constructor: (@program) ->
 
-  step: (tape, doOutput = false, output = console.log) ->
+  step: (tape, doOutput = false, log = console.log) ->
     if @halted or isHaltingState(@statenum) then return
     switch @decisionState
       when DECISION.WRITE
         @symbolRead = tape.read(@tapeIndex)
-        tape.write(@program.getDecision(@).write)
+        tape.write(@tapeIndex, @program.getDecision(@).write)
         @decisionState = DECISION.MOVE
       when DECISION.MOVE
         if @moveMode == MOVE.INSTANT
@@ -54,7 +54,7 @@ class TuringMachine
         @statenum = @program.getDecision(@).goto
         @halted = isHaltingState(@statenum)
         @decisionState = DECISION.WRITE
-    output("""
+    log("""
       symbol:   #{@symbolRead}
       decision: #{@decisionState}
       statenum: #{@statenum}
@@ -63,11 +63,13 @@ class TuringMachine
     """) if doOutput
     @decisionState
 
-  superstep: (tape, doOutput = false, output = console.log) ->
+  superstep: (tape, doOutput = false, log = console.log) ->
     if @halted then return
     else if @decisionState == DECISION.WITE
-      @step(tape, doOutput, output)
-      @superstep(tape, doOutput, output)
+      @step(tape, doOutput, log)
+      @superstep(tape, doOutput, log)
     else
-      @step(tape, doOutput, output) while not halted and @decisionState != DECISION.WRITE
+      @step(tape, doOutput, log) while not halted and @decisionState != DECISION.WRITE
     return
+
+module.exports = {TuringMachine}
