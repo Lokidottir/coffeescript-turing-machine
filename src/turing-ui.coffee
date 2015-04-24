@@ -23,9 +23,9 @@ class TuringUI
   apsID:        null # Actions per second input ID
 
   constructor: (@mainID, width = 1000, height = 700, renderRatio = 0.8) ->
-    @uuid = @genID()
+    @uuid = TuringUI.genID()
     loc = document.getElementById(@mainID)
-
+    loc.innerHTML = "<em>butts</em>"
     #@initRenderer()
     #@initTextInput()
     #@initConfigInputs()
