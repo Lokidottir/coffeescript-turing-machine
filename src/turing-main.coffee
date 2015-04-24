@@ -5,10 +5,10 @@
   This program is published under the MIT licence
 ###
 
-{TuringMachine} = require "./turing-machine.coffee"
+{TuringUI} = require("./turing-ui")
 
 main = () ->
-  a = new TuringMachine({})
+  a = new TuringUI("editor-target-div")
   console.log "Making stuff :)"
 
 main()

@@ -5,34 +5,41 @@
   This program is published under the MIT licence
 ###
 
-{TuringProgram, TuringState, TuringDecision} = require "./turing-program.coffee"
+{TuringProgram, TuringState, TuringDecision} = require "./turing-program"
 
-PARSER = {
+PARSER =
   COMMENT:  "(//.+)"
   STATENUM: "(@[0-9]+)"
-  STATE:    "(#{PARSER.STATENUM}[^@]*(?=endif))(endif)"
+  STATE:    "((@[0-9]+)[^@]*(?=endif))(endif)"
   SYMBOLC:  "(\\#[0-9]+)"
   DECISION: "((((elseif)|(if)\\s+[0-9]+)[\\S\\s]*?)(?=((else([\\ i]?))|(endif))))"
   ELSEPART: "((else\\s*\\n)[\\S\\s]*?(?=endif))"
-}
 
 class TuringParser
   ###
     Turing Machine program parseing namespace
 
     The first argument is a string program, state, or decision to
-    parse, the second argument is the errorlogger, a function that
-    can take a string.
+    parse, the second argument is the logger, a function that
+    can take a string intended to print output to somewhere.
   ###
+
+  @preprocess: (source) ->
+    source.replace(///#{PARSER.COMMENT}///g, "")
+      .replace(/(halt)/gi, "-1")
+      .replace(/(right)/gi, "+1")
+      .replace(/(left)/gi, "-1")
+
+
   @symbolCount: (programToParse) ->
     return parseInt(programToParse.match(///#{PARSER.SYMBOLC}///).substr(1))
 
   @parseProgram: (programToParse, log = console.log) ->
-    workingSource = programToParse.replace(///#{PARSER.COMMENT}///g, "").replace(/(halt)/g, -1)
+    workingSource = @preprocess(programToParse)
     program = new TuringProgram(TuringParser.symbolCount())
     stateList = workingSource.match(///#{PARSER.STATE}///g)
     for state in stateList
-      maybeState = TuringParser.parseState(state)
+      maybeState = TuringParser.parseState(state, program.symbols)
       if maybeState != undefined then program.add(maybeState)
       else
         log("[TuringParser.parseProgram] state parsing returned undefined")
@@ -40,8 +47,9 @@ class TuringParser
     log("[TuringParser.parseProgram] returning parsed program")
     return program
 
-  @parseState: (stateToParse, stateCount, log = console.log) ->
-    workingSource = stateToParse.replace(///#{PARSER.COMMENT}///g, "")
+  @parseState: (stateToParse, symbolCount, log = console.log) ->
+    workingSource = @preprocess(stateToParse)
+    statenum = parseInt(workingSource.match(///#{PARSER.STATENUM}///))
     state = new TuringState()
     decisionList = workingSource.match(///#{PARSER.DECISION}///g)
     for decision in decisionList
@@ -53,16 +61,15 @@ class TuringParser
     elseDecision = workingSource.match(///#{PARSER.ELSEPART}///g)
     parsedElse = TuringParser.parseDecision(elseDecision)
     if parsedElse != undefined
-      for statenum in [0..stateCount-1] by 1
-        if state.get(statenum) == undefined then state.add(statenum, parsedElse)
+      for symbolnum in [0..symbolCount-1] by 1
+        if state.get(symbolnum) == undefined then state.add(symbolnum, parsedElse)
+    else
+      log("[TuringParser.parseState] 'else' could not be parsed, assuming it wasn't present")
+    log("[TuringParser.parseState] returning parsed state")
+    return state
 
+  @parseDecision: (decisionToParse, statenum, log = console.log) ->
+    workingSource = @preprocess(decisionToParse)
 
-
-
-
-
-
-  @parseDecision: (decisionToParse, log = console.log) ->
-    workingSource = decisionToParse.replace(///#{PARSER.COMMENT}///g, "")
 
 module.exports = {TuringParser}

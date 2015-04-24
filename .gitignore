@@ -1,1 +1,4 @@
 lib/*
+bin/*
+!turing-machine.zip
+!turing-machine-includeable.js

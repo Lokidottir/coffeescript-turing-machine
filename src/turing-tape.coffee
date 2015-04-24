@@ -29,7 +29,7 @@ class TuringTape
       log("[TuringTape] could not write symbol '#{symbol}' to tape, not within tape's symbol range")
     else
       @writeAbstract((if index >= 0 then @postape else @negtape),
-        Math.abs(index - (if index >= 0 then 0 else 1)), symbol)
+        Math.abs(index - (if index >= 0 then 0 else 1)), parseInt(symbol))
 
   @writeAbstract: (tape, index, symbol) ->
     tape.push(@defaultSymbol) while tape.length < index

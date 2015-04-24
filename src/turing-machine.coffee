@@ -5,7 +5,7 @@
   This program is published under the MIT licence
 ###
 
-{isHaltingState} = require "./turing-program.coffee"
+{isHaltingState} = require "./turing-program"
 
 MOVE = {
   GRADUAL: 0
